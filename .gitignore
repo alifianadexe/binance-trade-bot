@@ -1,0 +1,5 @@
+/__pycache__
+/env
+/config/__pycache__
+/config/user_api.py
+/.vscode
