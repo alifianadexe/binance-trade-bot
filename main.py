@@ -4,6 +4,10 @@ from twisted.internet import reactor
 
 from config import user_api
 
+import pandas as pd
+import json
+import csv
+
 bnb_price = {'error':False}
 
 def bnb_trade_history(msg):
@@ -16,8 +20,28 @@ def bnb_trade_history(msg):
         
 client = Client(user_api.API_KEY, user_api.SECRET_KEY)
 
-bsm  = BinanceSocketManager(client)
-conn_key = bsm.start_kline_socket('BNBUSDT', bnb_trade_history)
-bsm.start()
+# open the websocket
+# bsm  = BinanceSocketManager(client)
+# conn_key = bsm.start_kline_socket('BNBUSDT', bnb_trade_history)
+# bsm.start()
+
+
+# valid intervals - 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1M
+
+# get timestamp of earliest date data availabel
+timestamp = client._get_earliest_valid_timestamp('BNBUSDT', '1d')
+print(timestamp)
+
+bars = client.get_historical_klines('BTCUSDT', '1d', timestamp, limit=1000)
+
+# delete unwanted data
+for line in bars:
+    del line[5:]
+
+bnb_df = pd.DataFrame(bars, columns=['date', 'open', 'high', 'low', 'close'])
+bnb_df.set_index('date', inplace=True)
+print(bnb_df.head())
+
+
 
 
